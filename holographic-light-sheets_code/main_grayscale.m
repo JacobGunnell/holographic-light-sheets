@@ -82,7 +82,8 @@ zz = linspace(Zmin,Zmax,Qz);
 
 Q = k*sqrt(1-(2.4048/(r0*k))^2); % central longitudinal wave number
 Nmax = floor((L/(2*pi))*(k-Q)); % maximum number of BBs
-krho0 = sqrt(1-Q/k)*k; % central transverse wave number
+%krho0 = sqrt(1-Q/k)*k; % central transverse wave number
+krho0 = sqrt(k^2-Q^2);
 N = Nmax;
 
 kzc = Q-2*pi*N/L; % longitudinal wave number of the Bessel beam with the highest axicon angle
@@ -95,15 +96,18 @@ Lxab = 2*Rab+(x0(end)-x0(1)); % minimum dimensions of a rectangular aperture (pl
 Lyab = 2*Rab;                 % the set of FWs   
 
 
+q = 0.5*k/(L*krho0); % control de Guassian apodization
+
+fprintf('Guassian beam waist (1/q): %f mm \n',(1/q)*1e3);
 fprintf('Number of Bessel beams in each FW superposition (2 N+1): %d \n',2*N+1);
 fprintf('Paraxiallity level (Q/k): %f \n',Q/k);
-fprintf('Highest axicon angle (º): %f \n',axicon_max*(180/pi));
+fprintf('Highest axicon angle (ï¿½): %f \n',axicon_max*(180/pi));
 fprintf('Corresponding longitudinal wavenumber (kzc/k): %f \n',kzc/k);
 fprintf('Inverse of the highest transverse wave number (nm): %f \n',1e9/krho_max);
 fprintf('Minimum rectangular aperture dimension in x (mm): %f \n',Lxab*1e3);
 fprintf('Minimum rectangular aperture dimension in y (mm): %f \n',Lyab*1e3);
 
-
+u = 0; % order of the Bessel-Gauss beams
 %% field squared amplitude
 tic
 Psi = 0;
@@ -114,7 +118,7 @@ for i=1:length(x0)
     [An,in,n] = profile_fw(aux,L,N);
     rho0 = sqrt(x0(i).^2+y0(i).^2);
     phi0 = atan2(y0(i),x0(i));
-    aux = field_fw(An,in,n,L,k,Q,rho0,phi0);
+    aux = field_fwbg(u,An,in,n,L,k,Q,q,rho0,phi0);
     Psi = Psi + aux; 
 end
 fPsi = matlabFunction(Psi,'vars', [rho phi z]);
@@ -143,3 +147,35 @@ set(gca,'FontSize',10,'FontWeight','bold')
 view([-270 90])
 %%
 
+% output phase only map for SLM
+% Define the inputs
+SLM_pixel_size = 8e-6;
+nx = 300;  % Example value for blazed grating angle in x-direction
+ny = 300;  % Example value for blazed grating angle in y-direction
+% nx=1e10;
+% ny=1e10;
+n_x = 1920;  % Size of the SLM in x-direction
+n_y = 1200;  % Size of the SLM in y-direction
+x = linspace(-n_x/2*SLM_pixel_size, n_x/2*SLM_pixel_size, n_x);  % Coordinate range in x
+y = linspace(-n_y/2*SLM_pixel_size, n_y/2*SLM_pixel_size, n_y);  % Coordinate range in y
+[X, Y] = meshgrid(x, y);  % Generate the mesh grid
+RHO = sqrt(X.^2 + Y.^2);
+PHI = atan2(Y,X);
+Psi1 = fPsi(RHO,PHI,0);
+
+% Perform phase retrieval
+%[SLM0, Energy] = GenerateHologram(Psi1, nx, ny, X, Y);
+[SLM0, Energy] = pr_cam(Psi1, nx, ny, X, Y, 1);
+
+
+% Display the results
+figure;
+imagesc(SLM0);
+colorbar;
+title('Phase-Only Hologram (SLM0)');
+
+disp(['Energy: ', num2str(Energy)]);
+
+%%
+
+% Simulate free-space propagation

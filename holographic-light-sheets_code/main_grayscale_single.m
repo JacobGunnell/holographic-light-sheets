@@ -18,13 +18,13 @@ clear all;
 clc;
 %% input parameters
 
-Ao = imread('logo_eesc.jpeg'); 
+Ao = imread('single.png'); 
                              % input image
                              % To test another image, make sure to load it 
                              % into the simulation folder
 
 
-M = 80; % number of linear FWs ( = number of pixels in x direction desired for the the input image)
+M = 1; % number of linear FWs ( = number of pixels in x direction desired for the the input image)
 Mz = 301; % number of pixels in z direction desired for the the input image
           
 lambda0 = 532e-9; %[m] operating wavelength of the laser in free space (visible range: 400 to 650 nm)
@@ -101,7 +101,7 @@ q = 0.5*k/(L*krho0); % control de Guassian apodization
 fprintf('Guassian beam waist (1/q): %f mm \n',(1/q)*1e3);
 fprintf('Number of Bessel beams in each FW superposition (2 N+1): %d \n',2*N+1);
 fprintf('Paraxiallity level (Q/k): %f \n',Q/k);
-fprintf('Highest axicon angle (ï¿½): %f \n',axicon_max*(180/pi));
+fprintf('Highest axicon angle (º): %f \n',axicon_max*(180/pi));
 fprintf('Corresponding longitudinal wavenumber (kzc/k): %f \n',kzc/k);
 fprintf('Inverse of the highest transverse wave number (nm): %f \n',1e9/krho_max);
 fprintf('Minimum rectangular aperture dimension in x (mm): %f \n',Lxab*1e3);
@@ -145,32 +145,30 @@ xlim([xx(1)*1e3 xx(end)*1e3])
 ylim([Zmin*1e3 Zmax*1e3])
 set(gca,'FontSize',10,'FontWeight','bold')
 view([-270 90])
+
 %%
+pitch = 8e-6;
+x = linspace(-600*pitch, 599*pitch, 1200);
+y = linspace(-600*pitch, 599*pitch, 1200);
+[X, Y] = meshgrid(x, y);
+Rho = sqrt(X.^2+Y.^2);
+Phi = atan2(X,Y);
+%%
+Psi_at_z0_evaluated = fPsi(Rho, Phi, 0);
+%%
+% Now you can pass the evaluated Psi to GenerateHologram
+nx = 300;
+ny = 300;
 
-% output phase only map for SLM
-% Define the inputs
-SLM_pixel_size = 8e-6;
-nx = 0;  % Example value for blazed grating angle in x-direction
-ny = 0;  % Example value for blazed grating angle in y-direction
-n_x = 1200;  % Size of the SLM in x-direction
-n_y = 1200;  % Size of the SLM in y-direction
-x = linspace(-n_x/2*SLM_pixel_size, n_x/2*SLM_pixel_size, n_x);  % Coordinate range in x
-y = linspace(-n_y/2*SLM_pixel_size, n_y/2*SLM_pixel_size, n_y);  % Coordinate range in y
-[X, Y] = meshgrid(x, y);  % Generate the mesh grid
-RHO = sqrt(X.^2 + Y.^2);
-PHI = atan2(Y,X);
-Psi1 = fPsi(RHO,PHI,0);
-
-% Perform phase retrieval
-[SLM0, Energy] = GenerateHologram(Psi1, nx, ny, X, Y);
-%[SLM0, Energy] = pr_cam(Psi1, nx, ny, X, Y, 1);
-
-
-% Display the results
+[SLM0, Energy] = GenerateHologram(Psi_at_z0_evaluated, nx, ny, X, Y);
 figure;
-imagesc(SLM0);
-colorbar;
-title('Phase-Only Hologram (SLM0)');
+mesh(SLM0);
+xlabel('X-axis Label');
+ylabel('Y-axis Label');
+zlabel('Z-axis Label');
+%%
+% Scale the matrix to be between 0 and 1 if it's not already
+matrix = mat2gray(SLM0);
 
-disp(['Energy: ', num2str(Energy)]);
-
+% Save the matrix as a grayscale JPEG image
+imwrite(matrix, 'Singlethread.bmp');

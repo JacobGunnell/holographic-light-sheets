@@ -19,8 +19,8 @@ aux=round(v*800+1);
 F = zeros(n_y,n_x);
 load fx2.mat;  %Saved table to perform Bessel function inversion
 % 
-  for mh=1:n_y;
-      for nh=1:n_x;
+  for mh=1:n_y
+      for nh=1:n_x
           temp=aux(mh,nh);
           F(mh,nh)=fx(temp);                                
       end                                                                    

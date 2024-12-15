@@ -149,13 +149,13 @@ view([-270 90])
 
 % output phase only map for SLM
 % Define the inputs
-SLM_pixel_size = 8e-6;
+pixel_pitch = 8e-6;
 nx = 0;  % Example value for blazed grating angle in x-direction
 ny = 0;  % Example value for blazed grating angle in y-direction
 n_x = 1200;  % Size of the SLM in x-direction
 n_y = 1200;  % Size of the SLM in y-direction
-x = linspace(-n_x/2*SLM_pixel_size, n_x/2*SLM_pixel_size, n_x);  % Coordinate range in x
-y = linspace(-n_y/2*SLM_pixel_size, n_y/2*SLM_pixel_size, n_y);  % Coordinate range in y
+x = linspace(-n_x/2*pixel_pitch, n_x/2*pixel_pitch, n_x);  % Coordinate range in x
+y = linspace(-n_y/2*pixel_pitch, n_y/2*pixel_pitch, n_y);  % Coordinate range in y
 [X, Y] = meshgrid(x, y);  % Generate the mesh grid
 RHO = sqrt(X.^2 + Y.^2);
 PHI = atan2(Y,X);

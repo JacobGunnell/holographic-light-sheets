@@ -15,14 +15,13 @@ dx = pixel_pitch;
 % Spatial frequency coordinates
 fx = linspace(-1/(2*dx), 1/(2*dx), n_x); 
 fy = linspace(-1/(2*dy), 1/(2*dy), n_y);
-[FX, FY, Z] = meshgrid(fx, fy, z);
-
-% Free-space transfer function (3d complex array)
-H = exp(-1j * k * Z .* sqrt(1 - (wavelength*FX).^2 - (wavelength*FY).^2));
+[FX, FY] = meshgrid(fx, fy);
 
 % Apply transfer function in the Fourier domain
+field_xyz = zeros(n_y, n_x, length(z)); % allocate array to store output field
 field_xy_fft = fftshift(fft2(field_xy)); % Fourier transform of the field
-input_xyz_fft = repmat(field_xy_fft, [1 1 length(z)]); % extend Fourier transform of input field to match size of H
-field_xyz_fft = input_xyz_fft .* H; % Multiply by transfer function
-field_xyz = ifft2(ifftshift(field_xyz_fft)); % Inverse Fourier transform
+parfor i=1:length(z)
+    H = exp(-1j * k * z(i) * sqrt(1 - (wavelength*FX).^2 - (wavelength*FY).^2)); % transfer function at current z position
+    field_xyz(:,:,i) = ifft2(ifftshift(field_xy_fft .* H)); % Multiply by inverse Fourier transform
+end
 

@@ -1,6 +1,5 @@
 function [SLM0,Energy] = pr_cam(Psi1,nx,ny,X,Y,gain)
-%PR_CAM Performs complex amplitude modulation-based phase retrieval on
-%provided target waveform
+%PR_CAM Performs phase retrieval on target field using the Complex Amplitude Modulation method
 %   Detailed explanation goes here
 [height,width] = size(Psi1);
 

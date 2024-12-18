@@ -56,7 +56,7 @@ x0 = Xmin:delta_x:Xmax;
 y0 = zeros(length(x0));
 
 % Target intensity profile (single thread)
-u1 = square(2*pi*zp/5.5e-2);
+u1 = (square(2*pi*zp/5.5e-2) + 1) ./ 2;
 
 
 Qx = 301;
@@ -98,7 +98,7 @@ aux = sum(u1.*function_gate(zp-step/2,zp+step/2));
 [An,in,n] = profile_fw(aux,L,N);
 %rho0 = sqrt(x0(i).^2+y0(i).^2);
 %phi0 = atan2(y0(i),x0(i));
-rho0 = 0.5e-3; % coordinates of light thread base
+rho0 = 0; % coordinates of light thread base
 phi0 = 0;
 Psi = field_fw(An,in,n,L,k,Q,rho0,phi0); % use Bessel beam field profile
 
@@ -128,28 +128,12 @@ set(gca,'FontSize',10,'FontWeight','bold')
 view([-270 90])
 
 %%
-pitch = 8e-6;
-x = linspace(-600*pitch, 599*pitch, 1200);
-y = linspace(-600*pitch, 599*pitch, 1200);
+pixel_pitch = 8e-6;
+x = linspace(-600*pixel_pitch, 599*pixel_pitch, 1200);
+y = linspace(-600*pixel_pitch, 599*pixel_pitch, 1200);
 [X, Y] = meshgrid(x, y);
 Rho = sqrt(X.^2+Y.^2);
 Phi = atan2(X,Y);
-%%
+
 Psi1 = fPsi(Rho, Phi, 0);
-%%
-% Now you can pass the evaluated Psi to GenerateHologram
-nx = 300;
-ny = 300;
 
-[SLM0, Energy] = GenerateHologram(Psi1, nx, ny, X, Y);
-figure;
-mesh(SLM0);
-xlabel('X-axis Label');
-ylabel('Y-axis Label');
-zlabel('Z-axis Label');
-%%
-% Scale the matrix to be between 0 and 1 if it's not already
-%matrix = mat2gray(SLM0);
-
-% Save the matrix as a grayscale JPEG image
-%imwrite(matrix, 'Singlethread.bmp');

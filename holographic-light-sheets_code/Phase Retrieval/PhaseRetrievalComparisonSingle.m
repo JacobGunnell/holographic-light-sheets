@@ -1,6 +1,6 @@
 %% Simulate propagation
 pixel_pitch = 8e-6;
-cmax = 2.5;
+cmax = 1;
 
 % Ideal Field (full-complex SLM)
 ideal = propagate_field(Psi1, lambda, pixel_pitch, zz);
@@ -16,7 +16,7 @@ colormap jet;
 %arrizon = propagate_field(arrizon_lpf, lambda, pixel_pitch, zz);
 
 %% CAM
-beta = 1.7;
+beta = 0.5;
 cam_phase = pr_cam(Psi1, beta);
 cam = propagate_field(exp(1j*cam_phase), lambda, pixel_pitch, zz);
 
@@ -31,19 +31,14 @@ uerd = propagate_field(exp(1j*uerd_phase), lambda, pixel_pitch, zz);
 
 %% Figure 1: Ideal
 fig = figure(1);
-t = tiledlayout(1,2, 'TileSpacing', 'compact', 'Padding', 'tight'); % Create tiled layout
+t = tiledlayout(fig, 2, 1, 'TileSpacing', 'compact', 'Padding', 'tight'); % Create tiled layout
 t.OuterPosition = [0 0 0.85 1];
 
-% Target image
 nexttile;
-target_image = imread('Pictures/sailor_cougar.jpg');
-imshow(target_image);
-title('Target Image');
-
-% Ideal field
-nexttile;
-display_sheet(ideal, xx, zz);
+display_thread(ideal, xx, zz);
 title('Ideal Field (full-complex SLM)');
+nexttile;
+display_thread_profile(ideal, zz);
 
 % Add a shared colorbar
 % Use a hidden axis to create a global colorbar
@@ -56,52 +51,36 @@ cb.Label.String = 'Intensity |U|^2';
 %% Figure 2: Phase retrieval algorithms comparison
 
 fig = figure(2);
-t = tiledlayout(2,2, 'TileSpacing', 'compact', 'Padding', 'tight'); % Create tiled layout
+t = tiledlayout(4,2, 'TileSpacing', 'compact', 'Padding', 'tight'); % Create tiled layout
 t.OuterPosition = [0 0 0.85 1];
 
 % Arrizon
-nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(arrizon(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
+nexttile(1);
+display_thread(arrizon, xx, zz);
 title('Arrizon');
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
+nexttile(3);
+display_thread_profile(arrizon, zz);
 
 % CAM
-nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(cam(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
+nexttile(2);
+display_thread(cam, xx, zz);
 title(['CAM, \beta=' num2str(beta)]);
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
+nexttile(4);
+display_thread_profile(cam, zz);
 
 % 2x2 Macroblock
-nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(macroblock(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
-title('2x2 Macroblock with 4f LPF');
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
+nexttile(5);
+display_thread(macroblock, xx, zz);
+title('2x2 Macroblock')
+nexttile(7);
+display_thread_profile(macroblock, zz);
 
 % UERD
-nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(uerd(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
+nexttile(6);
+display_thread(uerd, xx, zz);
 title('Unidirectional Error Diffusion (UERD)');
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
+nexttile(8);
+display_thread_profile(uerd, zz);
 
 % Add a shared colorbar
 % Use a hidden axis to create a global colorbar
@@ -110,3 +89,6 @@ cb = colorbar(cb_ax, 'Position', [0.92 0.1 0.02 0.8]); % Manual position on the 
 colormap('jet');
 clim([0 cmax]);
 cb.Label.String = 'Intensity |U|^2';
+
+%% Save for SLM
+save Variables\single_thread_phase.mat cam_phase uerd_phase arrizon_phase macroblock_phase

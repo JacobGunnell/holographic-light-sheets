@@ -1,6 +1,5 @@
 %% This code uses the Arrizon method to calculate a phase-only computer generated hologram to accurately encode a target complex field profile
 %% Author: Ahmed H Dorrah, June 2018
-%% Revisions: Jacob Gunnell, November 2024
 
 %nx and ny refer to the blazed grating angle imparted on the desired
 %pattern to help filter the target signal from the on axis (zero-th order
@@ -33,3 +32,5 @@ gx=nx/(n_y*8e-6);
     SLM0=mod(Hol,1.17*pi);
     L = F.*exp(1i*ph);
     Energy = sum(sum(L.*conj(L)));
+
+end

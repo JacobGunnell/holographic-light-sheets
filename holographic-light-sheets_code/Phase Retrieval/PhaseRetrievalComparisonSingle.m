@@ -8,14 +8,30 @@ ideal = propagate_field(Psi1, lambda, pixel_pitch, zz);
 %% Arrizon
 n = 300; % blazed grating angle in Dorrah units
 arrizon_phase = pr_arrizon(Psi1, n, n, X, Y);
-arrizon_fft = fftshift(fft2(exp(1j*arrizon_phase)));
+arrizon_fft = fftshift(fft2(exp(1j*100*arrizon_phase)));
 figure;
-surf(X, Y, abs(arrizon_fft).^2);
+fx = linspace(-1/(2*pixel_pitch), 1/(2*pixel_pitch), 1200);
+fy = linspace(-1/(2*pixel_pitch), 1/(2*pixel_pitch), 1200);
+[FX,FY] = meshgrid(fx, fy);
+surf(FX, FY, abs(arrizon_fft).^2);
+shading flat;
 colormap jet;
-%arrizon_lpf = spatial_filter(exp(1j*arrizon_phase), pixel_pitch, 2e4, [n_real n_real]);
-%arrizon = propagate_field(arrizon_lpf, lambda, pixel_pitch, zz);
+colorbar;
+set(gca,'ColorScale','log');
+view([-270 90]);
 
-%% CAM
+%%
+grating_freq = 1.17 * n / (2 * pixel_pitch * 1200); % blazed grating frequency in lp/m
+freq_radius = grating_freq*sqrt(2)-1000;
+arrizon_lpf = spatial_filter(exp(1j*arrizon_phase), pixel_pitch, 1e4, [-grating_freq grating_freq]);
+arrizon = propagate_field(arrizon_lpf, lambda, pixel_pitch, zz);
+figure;
+display_thread(arrizon,xx,zz);
+colormap jet;
+colorbar;
+set(gca,'ColorScale','log');
+%%
+% CAM
 beta = 0.5;
 cam_phase = pr_cam(Psi1, beta);
 cam = propagate_field(exp(1j*cam_phase), lambda, pixel_pitch, zz);

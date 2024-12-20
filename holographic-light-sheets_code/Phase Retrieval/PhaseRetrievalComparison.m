@@ -5,17 +5,17 @@ cmax = 2.5;
 % Ideal Field (full-complex SLM)
 ideal = propagate_field(Psi1, lambda, pixel_pitch, zz);
 
-%% Arrizon
+% Arrizon
 n = 300; % blazed grating angle in Dorrah units
 arrizon_phase = pr_arrizon(Psi1, n, n, X, Y);
 arrizon_fft = fftshift(fft2(exp(1j*arrizon_phase)));
-figure;
-surf(X, Y, abs(arrizon_fft).^2);
-colormap jet;
-%arrizon_lpf = spatial_filter(exp(1j*arrizon_phase), pixel_pitch, 2e4, [n_real n_real]);
-%arrizon = propagate_field(arrizon_lpf, lambda, pixel_pitch, zz);
+%figure;
+%surf(X, Y, abs(arrizon_fft).^2);
+%colormap jet;
+arrizon_lpf = spatial_filter(exp(1j*arrizon_phase), pixel_pitch, 2e4, [70e3 70e3]);
+arrizon = propagate_field(arrizon_lpf, lambda, pixel_pitch, zz);
 
-%% CAM
+% CAM
 beta = 1.7;
 cam_phase = pr_cam(Psi1, beta);
 cam = propagate_field(exp(1j*cam_phase), lambda, pixel_pitch, zz);
@@ -61,47 +61,23 @@ t.OuterPosition = [0 0 0.85 1];
 
 % Arrizon
 nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(arrizon(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
+display_sheet(arrizon, xx, zz);
 title('Arrizon');
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
 
 % CAM
 nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(cam(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
+display_sheet(cam, xx, zz);
 title(['CAM, \beta=' num2str(beta)]);
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
 
 % 2x2 Macroblock
 nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(macroblock(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
-title('2x2 Macroblock with 4f LPF');
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
+display_sheet(macroblock, xx, zz);
+title('2x2 Macroblock');
 
 % UERD
 nexttile;
-surf(XX*1e3, ZZ*1e3, permute(abs(uerd(600,600:900,:)).^2, [3 2 1]));
-shading flat;
-xlabel('x (mm)');
-ylabel('z (mm)');
+display_sheet(uerd, xx, zz);
 title('Unidirectional Error Diffusion (UERD)');
-xlim([xx(1)*1e3 xx(end)*1e3]);
-ylim([Zmin*1e3 Zmax*1e3]);
-view([-270 90]);
 
 % Add a shared colorbar
 % Use a hidden axis to create a global colorbar

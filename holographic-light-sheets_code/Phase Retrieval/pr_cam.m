@@ -1,15 +1,15 @@
-function SLM = pr_cam(Psi1,gain)
+function SLM = pr_cam(field,gain)
 %PR_CAM Performs phase retrieval on target field using the Complex Amplitude Modulation method
 %   Detailed explanation goes here
 
-ph = angle(Psi1);
-mag = abs(Psi1);
+% normalize field such that average amplitude is 1, then multilply by gain
+a_avg = sum(sum(abs(field))) / numel(field);
+field_scaled = gain * field / a_avg;
 
-if length(gain) > 1
-    gain_reshaped = reshape(gain, 1, 1, []); % if gain is a 1d array with multiple gains, apply each gain in a separate slice of the resulting array
-    SLM = mod(gain_reshaped .* mag .* cos(ph) + pi, 2*pi);
-else
-    SLM = mod(gain * mag .* cos(ph) + pi, 2*pi);
-end
+ph = angle(field_scaled);
+mag = abs(field_scaled);
+
+SLM = mag .* cos(ph);
+
 end
 

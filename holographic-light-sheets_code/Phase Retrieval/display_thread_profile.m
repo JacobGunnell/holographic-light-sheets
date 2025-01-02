@@ -3,9 +3,9 @@ function display_thread_profile(field, zz)
 %   Detailed explanation goes here
 
 % Intensity profile
-plot(zz*1e3, permute(abs(field(600,600,:)).^2, [2 3 1]));
+semilogy(zz*1e3, abs(field(600,:)').^2);
 xlabel('z (mm)');
-ylabel('Intensity |U|^2');
+ylabel('Intensity (W/m^2)');
 xlim([zz(1)*1e3 zz(end)*1e3]);
 
 end

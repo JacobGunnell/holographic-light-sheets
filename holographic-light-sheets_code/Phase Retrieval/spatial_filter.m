@@ -14,8 +14,11 @@ function output_field = spatial_filter(input_field, pixel_pitch, cutoff_radius, 
 % Returns:
 % output_field  - 2D complex field at the output plane
 
-% Get the size of the input field
+% Get the size of the input field and define spatial coordinates
 [n_y, n_x] = size(input_field);
+x = linspace(-n_x*pixel_pitch/2, n_x*pixel_pitch/2, n_x);
+y = linspace(-n_y*pixel_pitch/2, n_y*pixel_pitch/2, n_y);
+[X, Y] = meshgrid(x, y);
 
 % Define spatial frequency coordinates
 fy0 = passband_shift(1);
@@ -32,12 +35,7 @@ filter = double(frequency_radius <= cutoff_radius); % 1 inside cutoff, 0 outside
 input_field_fft = fftshift(fft2(input_field));
 filtered_field_fft = input_field_fft .* filter;
 
-% Shift the passband center to the origin
-% Multiply by a phase factor to shift frequencies in the Fourier domain
-phase_shift = exp(-1j * 2 * pi * (fx0 * FX + fy0 * FY));
-aligned_filtered_field_fft = filtered_field_fft .* phase_shift;
-
-% Step 3: Inverse Fourier transform to get the output field
-output_field = ifft2(ifftshift(aligned_filtered_field_fft));
+% Inverse Fourier transform and shift the passband center to the origin
+output_field = ifft2(ifftshift(filtered_field_fft)) .* exp(-1j*2*pi*(fx0*X + fy0*Y));
 
 end

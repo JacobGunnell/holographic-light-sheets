@@ -3,7 +3,7 @@ function display_sheet(field, xx, zz)
 %   Detailed explanation goes here
 
 [XX,ZZ] = meshgrid(xx,zz);
-surf(XX*1e3, ZZ*1e3, permute(abs(field(600,600:900,:)).^2, [3 2 1]));
+surf(XX*1e3, ZZ*1e3, abs(field(600:900,:)').^2);
 shading flat;
 xlabel('x (mm)');
 ylabel('z (mm)');

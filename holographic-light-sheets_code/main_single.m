@@ -25,7 +25,7 @@ Mz = 301; % number of pixels in z direction desired for the the input image
 lambda0 = 532e-9; %[m] operating wavelength of the laser in free space (visible range: 400 to 650 nm)
 r0 = 20e-6; % [m] spot size radius of each FW
 delta_x_param = 1; % distance between the FWs in terms of r0. For delta_x_param = 2, delta_x = 2 x r0 
-L = 550e-3; % [m] longitudinal distance of each FW ( = image length in z direction)
+L = 250e-3; % [m] longitudinal distance of each FW ( = image length in z direction)
 
 
 %%
@@ -56,7 +56,7 @@ x0 = Xmin:delta_x:Xmax;
 y0 = zeros(length(x0));
 
 % Target intensity profile (single thread)
-u1 = (square(2*pi*zp/5.5e-2) + 1) ./ 2;
+u1 = (square(2*pi*zp/2.5e-2) + 1) ./ 2;
 
 
 Qx = 301;
@@ -126,6 +126,7 @@ xlim([xx(1)*1e3 xx(end)*1e3])
 ylim([Zmin*1e3 Zmax*1e3])
 set(gca,'FontSize',10,'FontWeight','bold')
 view([-270 90])
+set(gcf, "Theme", "light");
 
 %%
 pixel_pitch = 8e-6;
